@@ -1,0 +1,62 @@
+// ============================================================
+// Clamp *  @include clamp(width, 1rem, 150px, 768);
+// ============================================================
+
+@mixin clamp($attr, $min, $max, $container) {
+  $pref: calc($max * 100cqi / $container);
+
+  #{$attr}: clamp(#{$min}, #{$pref}, #{$max});
+}
+
+main {
+  $width: 500px;
+
+  max-width: $width;
+  background-color: bisque;
+  text-align: center;
+
+  container: main-container / inline-size;
+
+  h1 {
+    @include clamp(font-size, 10px, 50px, $width);
+  }
+}
+
+section {
+  padding: 2rem;
+  background-color: darkslateblue;
+
+  table {
+    border-collapse: collapse;
+    border-bottom: 2px solid skyblue;
+    color: white;
+
+    thead {
+      th {
+        border-bottom: 1px solid yellowgreen;
+        background-color: gray;
+        padding: 0.5rem;
+      }
+    }
+
+    tbody {
+      th {
+        padding: 0.5rem;
+        background-color: #999;
+        border: 2px solid #fff;
+      }
+      td {
+        padding: 0.5rem;
+        border-right: 2px solid yellow;
+      }
+
+      //   .bt, th~* 둘중 아무거나 사용
+      //   .bt {
+      //     border-top: 2px solid black;
+      //   }
+      th ~ * {
+        border-top: 2px solid skyblue;
+      }
+    }
+  }
+}

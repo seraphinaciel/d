@@ -1,0 +1,36 @@
+main {
+  max-width: 500px;
+  background-color: bisque;
+  text-align: center;
+  container: main-container/inline-size;
+}
+main h1 {
+  font-size: clamp(10px, 10cqi, 50px);
+}
+
+section {
+  padding: 2rem;
+  background-color: darkslateblue;
+}
+section table {
+  border-collapse: collapse;
+  border-bottom: 2px solid skyblue;
+  color: white;
+}
+section table thead th {
+  border-bottom: 1px solid yellowgreen;
+  background-color: gray;
+  padding: 0.5rem;
+}
+section table tbody th {
+  padding: 0.5rem;
+  background-color: #999;
+  border: 2px solid #fff;
+}
+section table tbody td {
+  padding: 0.5rem;
+  border-right: 2px solid yellow;
+}
+section table tbody th ~ * {
+  border-top: 2px solid skyblue;
+}
