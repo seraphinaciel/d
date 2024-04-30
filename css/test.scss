@@ -34,10 +34,19 @@
 // 변수
 $width: 500px;
 
+body {
+  text-align: center;
+  & * {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
 main {
   max-width: $width;
   background-color: bisque;
-  text-align: center;
+  margin: auto;
 
   // container query
   container: main-container / inline-size;
@@ -50,6 +59,35 @@ main {
     background-color: aquamarine;
 
     width: gap-in(20vw, $width);
+  }
+}
+
+article {
+  max-width: $width * 2;
+  background-color: skyblue;
+  margin: auto;
+
+  // container query
+  container: article / inline-size;
+
+  h2 {
+    @include clamp(font-size, 10px, 30px, $width * 2);
+  }
+
+  ul {
+    padding: 1rem;
+
+    @container article (min-width:700px) {
+      padding: 2rem;
+    }
+
+    li {
+      background-color: whitesmoke;
+
+      @container article (min-width:700px) {
+        background: red;
+      }
+    }
   }
 }
 

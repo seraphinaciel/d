@@ -1,7 +1,16 @@
+body {
+  text-align: center;
+}
+body * {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 main {
   max-width: 500px;
   background-color: bisque;
-  text-align: center;
+  margin: auto;
   container: main-container/inline-size;
 }
 main h1 {
@@ -10,6 +19,32 @@ main h1 {
 main p {
   background-color: aquamarine;
   width: clamp(1px, 4vw, 20vw);
+}
+
+article {
+  max-width: 1000px;
+  background-color: skyblue;
+  margin: auto;
+  container: article/inline-size;
+}
+article h2 {
+  font-size: clamp(10px, 3cqi, 30px);
+}
+article ul {
+  padding: 1rem;
+}
+@container article (min-width:700px) {
+  article ul {
+    padding: 2rem;
+  }
+}
+article ul li {
+  background-color: whitesmoke;
+}
+@container article (min-width:700px) {
+  article ul li {
+    background: red;
+  }
 }
 
 section {
