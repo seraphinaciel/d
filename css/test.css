@@ -7,6 +7,10 @@ main {
 main h1 {
   font-size: clamp(10px, 10cqi, 50px);
 }
+main p {
+  background-color: aquamarine;
+  width: clamp(1px, 4vw, 20vw);
+}
 
 section {
   padding: 2rem;

@@ -1,24 +1,55 @@
+@use "sass:math";
+
 // ============================================================
 // Clamp *  @include clamp(width, 1rem, 150px, 768);
 // ============================================================
-
 @mixin clamp($attr, $min, $max, $container) {
   $pref: calc($max * 100cqi / $container);
 
   #{$attr}: clamp(#{$min}, #{$pref}, #{$max});
 }
 
-main {
-  $width: 500px;
+// 단위 삭제 * 10px → 10 숫자추출
+@function strip-unit($number) {
+  @if type-of($number) == "number" and not unitless($number) {
+    @return math.div($number, $number * 0 + 1);
+  }
+  @return $number;
+}
 
+// ============================================================
+// gap-in *  $gap : 원하는 여백, $container : 감싸는 블록의 너비
+// ============================================================
+@function gap-in($gap, $container) {
+  $container: strip-unit($container);
+  $pref: calc($gap / $container * 100);
+
+  @if ($gap < 0) {
+    @return max($pref, #{$gap});
+  } @else {
+    @return clamp(1px, $pref, #{$gap});
+  }
+}
+
+// 변수
+$width: 500px;
+
+main {
   max-width: $width;
   background-color: bisque;
   text-align: center;
 
+  // container query
   container: main-container / inline-size;
 
   h1 {
     @include clamp(font-size, 10px, 50px, $width);
+  }
+
+  p {
+    background-color: aquamarine;
+
+    width: gap-in(20vw, $width);
   }
 }
 
