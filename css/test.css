@@ -33,7 +33,7 @@ article h2 {
 article ul {
   padding: 1rem;
 }
-@container article (min-width:700px) {
+@container article (inline-size > 800px) {
   article ul {
     padding: 2rem;
   }
@@ -41,7 +41,7 @@ article ul {
 article ul li {
   background-color: whitesmoke;
 }
-@container article (min-width:700px) {
+@container article (700px <= width <= 900px) {
   article ul li {
     background: red;
   }

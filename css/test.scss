@@ -77,14 +77,14 @@ article {
   ul {
     padding: 1rem;
 
-    @container article (min-width:700px) {
+    @container article (inline-size > 800px) {
       padding: 2rem;
     }
 
     li {
       background-color: whitesmoke;
 
-      @container article (min-width:700px) {
+      @container article (700px <= width <= 900px) {
         background: red;
       }
     }
