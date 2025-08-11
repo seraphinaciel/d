@@ -1,0 +1,305 @@
+// =============================================================================
+// Container Queries SCSS Library
+// =============================================================================
+
+// Variables
+$default-container-type: inline-size;
+$default-breakpoints: (400px, 800px, 1200px);
+$default-scale-ratios: (0.75, 1, 1.25);
+
+// Dashboard breakpoints
+$dashboard-breakpoints: (
+    desktop: 1920px,
+    tablet: 1280px,
+    mobile: 1279px,
+);
+
+// =============================================================================
+// Core Container Query Mixins
+// =============================================================================
+
+/// 컨테이너 쿼리 설정
+/// @param {String} $container-type - 컨테이너 타입 (기본값: inline-size)
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin container-query($container-type: $default-container-type, $container-name: null) {
+    container-type: $container-type;
+
+    @if $container-name {
+        container-name: $container-name;
+    }
+}
+
+/// 컨테이너 쿼리 조건
+/// @param {String} $condition - 쿼리 조건
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin container($condition, $container-name: null) {
+    @if $container-name {
+        @container #{$container-name} ($condition) {
+            @content;
+        }
+    } @else {
+        @container ($condition) {
+            @content;
+        }
+    }
+}
+
+/// cqi 단위 컨테이너 쿼리
+/// @param {String} $condition - 쿼리 조건
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin container-cqi($condition, $container-name: null) {
+    @include container($condition, $container-name) {
+        @content;
+    }
+}
+
+// =============================================================================
+// Utility Functions
+// =============================================================================
+
+/// cqi 단위 계산
+/// @param {Number} $base-size - 기본 크기
+/// @param {Number} $multiplier - 배수 (기본값: 1)
+/// @return {String} calc() 표현식
+@function calculate-cqi($base-size, $multiplier: 1) {
+    @return calc(#{$base-size} * #{$multiplier}cqi);
+}
+
+/// clamp 함수 생성
+/// @param {Number|String} $min - 최소값
+/// @param {Number|String} $preferred - 선호값
+/// @param {Number|String} $max - 최대값
+/// @return {String} clamp() 표현식
+@function calculate-clamp($min, $preferred, $max) {
+    @return clamp(#{$min}, #{$preferred}, #{$max});
+}
+
+/// 반응형 크기 계산
+/// @param {Number} $base-size - 기본 크기
+/// @param {Number} $breakpoint-ratio - breakpoint 비율
+/// @return {String} calc() 표현식
+@function calculate-responsive-size($base-size, $breakpoint-ratio: 1) {
+    @return calc(#{$base-size} * #{$breakpoint-ratio});
+}
+
+// =============================================================================
+// Automated Responsive Mixins
+// =============================================================================
+
+/// 반응형 속성 자동 적용
+/// @param {Map} $props - 속성 맵
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin responsive-props($props, $container-name: null) {
+    @each $prop, $values in $props {
+        @if type-of($values) == 'map' {
+            @each $breakpoint, $value in $values {
+                @include container('(max-width: #{$breakpoint})', $container-name) {
+                    #{$prop}: $value;
+                }
+            }
+        } @else {
+            #{$prop}: $values;
+        }
+    }
+}
+
+/// cqi 기반 자동 속성 적용
+/// @param {Map} $props - 속성 설정 맵
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin auto-cqi-props($props, $container-name: null) {
+    @each $prop, $config in $props {
+        @if type-of($config) == 'map' {
+            $base-size: map-get($config, 'base');
+            $min-size: map-get($config, 'min');
+            $max-size: map-get($config, 'max');
+            // $cqi-multiplier: map-get($config, 'cqi');
+
+            #{$prop}: calculate-clamp($min-size, calculate-cqi($base-size, 100cqi), $max-size);
+        } @else {
+            #{$prop}: $config;
+        }
+    }
+}
+
+/// 자동 breakpoint 생성
+/// @param {List} $breakpoints - breakpoint 리스트
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin auto-breakpoints($breakpoints: $default-breakpoints, $container-name: null) {
+    @each $breakpoint in $breakpoints {
+        @include container('(max-width: #{$breakpoint})', $container-name) {
+            @content;
+        }
+    }
+}
+
+/// 자동 스케일링
+/// @param {Number} $base-size - 기본 크기
+/// @param {List} $scale-ratios - 스케일 비율 리스트
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin auto-scale($base-size, $scale-ratios: $default-scale-ratios, $container-name: null) {
+    @each $ratio in $scale-ratios {
+        $scaled-size: calculate-responsive-size($base-size, $ratio);
+        @include container('(max-width: #{400px * $ratio})', $container-name) {
+            font-size: $scaled-size;
+        }
+    }
+}
+
+// =============================================================================
+// Dashboard Specific Mixins
+// =============================================================================
+
+/// 대시보드용 컨테이너 (1920px, 1280px 기준)
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin dashboard-container($container-name: null) {
+    @include container-query(inline-size, $container-name);
+
+    // Desktop (1920px 이상)
+    @include container('(min-width: #{map-get($dashboard-breakpoints, desktop)})', $container-name) {
+        @content;
+    }
+
+    // Tablet (1280px - 1919px)
+    @include container('(min-width: #{map-get($dashboard-breakpoints, tablet)}) and (max-width: #{map-get($dashboard-breakpoints, desktop) - 1px})', $container-name) {
+        @content;
+    }
+
+    // Mobile (1279px 이하)
+    @include container('(max-width: #{map-get($dashboard-breakpoints, mobile)})', $container-name) {
+        @content;
+    }
+}
+
+/// cqi 단위 대시보드 컨테이너
+/// @param {String} $container-name - 컨테이너 이름 (선택사항)
+@mixin dashboard-container-cqi($container-name: null) {
+    @include container-query(inline-size, $container-name);
+
+    // Desktop (100cqi 이상)
+    @include container-cqi('(min-width: 100cqi)', $container-name) {
+        @content;
+    }
+
+    // Tablet (70cqi - 99cqi)
+    @include container-cqi('(min-width: 70cqi) and (max-width: 99cqi)', $container-name) {
+        @content;
+    }
+
+    // Mobile (69cqi 이하)
+    @include container-cqi('(max-width: 69cqi)', $container-name) {
+        @content;
+    }
+}
+
+// =============================================================================
+// Preset Configurations
+// =============================================================================
+
+/// 로그인 제목 스타일 설정
+$login-title-config: (
+    font-size: (
+        base: 1,
+        min: 2rem,
+        max: 3rem,
+        cqi: 100,
+    ),
+    margin: (
+        base: 1,
+        min: 20px,
+        max: 60px,
+        cqi: 100,
+    ),
+);
+
+/// 헤딩 스타일 설정
+$heading-config: (
+    h1: (
+        font-size: (
+            base: 1.5,
+            min: 16px,
+            max: 42px,
+            cqi: 100,
+        ),
+        margin: (
+            base: 1,
+            min: 30px,
+            max: 80px,
+            cqi: 100,
+        ),
+    ),
+    h2: (
+        font-size: (
+            base: 1.25,
+            min: 2rem,
+            max: 3rem,
+            cqi: 100,
+        ),
+        margin: (
+            base: 1,
+            min: 25px,
+            max: 60px,
+            cqi: 100,
+        ),
+    ),
+    h3: (
+        font-size: (
+            base: 1,
+            min: 1.5rem,
+            max: 2.5rem,
+            cqi: 100,
+        ),
+        margin: (
+            base: 1,
+            min: 20px,
+            max: 40px,
+            cqi: 100,
+        ),
+    ),
+);
+
+// =============================================================================
+// Component Examples
+// =============================================================================
+
+/// 로그인 제목 스타일
+.login-title {
+    @include auto-cqi-props($login-title-config, login-title);
+}
+
+/// 헤딩 스타일
+h1 {
+    @include auto-cqi-props(map-get($heading-config, h1), heading);
+}
+
+h2 {
+    @include auto-cqi-props(map-get($heading-config, h2), heading);
+}
+
+h3 {
+    @include auto-cqi-props(map-get($heading-config, h3), heading);
+}
+
+/// 대시보드 카드 예시
+.dashboard-card {
+    background: beige;
+    @include dashboard-container-cqi(dashboard-card) {
+        & > div {
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+/// 반응형 버튼 예시
+.responsive-button {
+    @include auto-breakpoints((400px, 800px, 1200px), button) {
+        padding: 10px 20px;
+        font-size: 16px;
+
+        @include container('(max-width: 600px)', button) {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+    }
+}

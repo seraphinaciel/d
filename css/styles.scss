@@ -1,0 +1,144 @@
+@use 'sass:math';
+
+@function decimal-round($point) {
+    @return math.div(math.round($point * 10000), 10000);
+}
+@function check-var($value) {
+    @if (type-of($value) == 'number') {
+        @return $value;
+    } @else {
+        @return var($value);
+    }
+}
+
+// ============================================================
+// clamp-cqi function * clamp-cqi(11, 36, --container-width);
+// ============================================================
+@function clamp-cqi($min, $max, $container-width) {
+    @if $min < 0 {
+        @return #{calc(check-var($max) / check-var($container-width) * 100cqi)};
+    } @else {
+        @return clamp(#{calc(check-var($min) * 1px)}, #{calc(check-var($max) / check-var($container-width) * 100cqi)}, #{calc(check-var($max) * 1px)});
+    }
+}
+
+// 단위 삭제 * 10px → 10 숫자추출
+@function strip-unit($number) {
+    @if type-of($number) == 'number' and not unitless($number) {
+        @return math.div($number, $number * 0 + 1);
+    }
+    @return $number;
+}
+
+// ============================================================
+// gap-in *  $gap : 원하는 여백, $container : 감싸는 블록의 너비
+// ============================================================
+@function gap-in($gap, $container) {
+    $container: strip-unit($container);
+    $pref: calc($gap / $container * 100);
+
+    @if ($gap < 0) {
+        @return max($pref, #{$gap});
+    } @else {
+        @return clamp(1px, $pref, #{$gap});
+    }
+}
+
+// 변수
+$width: 500px;
+
+body {
+    text-align: center;
+    & * {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+main {
+    max-width: $width;
+    background-color: bisque;
+    margin: auto;
+
+    // container query
+    container: main-container / inline-size;
+
+    h1 {
+        @include clamp-cqi(font-size, 10px, 50px, $width);
+    }
+
+    p {
+        background-color: aquamarine;
+
+        width: gap-in(20vw, $width);
+    }
+}
+
+article {
+    max-width: $width * 2;
+    background-color: skyblue;
+    margin: auto;
+
+    // container query
+    container: article / inline-size;
+
+    h2 {
+        @include clamp-cqi(font-size, 10px, 30px, $width * 2);
+    }
+
+    ul {
+        padding: 1rem;
+
+        @container article (inline-size > 800px) {
+            padding: 2rem;
+        }
+
+        li {
+            background-color: whitesmoke;
+
+            @container article (700px <= width <= 900px) {
+                background: red;
+            }
+        }
+    }
+}
+
+section {
+    padding: 2rem;
+    background-color: darkslateblue;
+
+    table {
+        border-collapse: collapse;
+        border-bottom: 2px solid skyblue;
+        color: white;
+
+        thead {
+            th {
+                border-bottom: 1px solid yellowgreen;
+                background-color: gray;
+                padding: 0.5rem;
+            }
+        }
+
+        tbody {
+            th {
+                padding: 0.5rem;
+                background-color: #999;
+                border: 2px solid #fff;
+            }
+            td {
+                padding: 0.5rem;
+                border-right: 2px solid yellow;
+            }
+
+            //   .bt, th~* 둘중 아무거나 사용
+            //   .bt {
+            //     border-top: 2px solid black;
+            //   }
+            th ~ * {
+                border-top: 2px solid skyblue;
+            }
+        }
+    }
+}
